@@ -1,0 +1,35 @@
+services:
+
+  # Task Service (Spring Boot app)
+  task-service:
+    build: .                          # build using the Dockerfile in current dir
+    ports:
+      - "8080:8080"                   # host:container — maps your machine's 8080 to container's 8080
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}   # "postgres" = service name below, acts as hostname
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      SPRING_PROFILES_ACTIVE: prod
+    depends_on:
+      postgres:
+        condition: service_healthy    # wait until postgres is actually ready, not just started
+
+  # PostgresSQL Database
+  postgres:
+    image: postgres:16-alpine         # use official postgres image, no Dockerfile needed
+    ports:
+      - "5432:5432"                   # expose so you can connect from IntelliJ/pgAdmin too
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data   # persist data so it survives container restarts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]   # how Docker checks if postgres is ready
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:    # declares the named volume used above

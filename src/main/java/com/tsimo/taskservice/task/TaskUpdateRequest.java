@@ -1,4 +1,6 @@
 package com.tsimo.taskservice.task;
 
-public record TaskUpdateRequest(String title) {
+import jakarta.validation.constraints.NotBlank;
+
+public record TaskUpdateRequest(@NotBlank String title, String description, TaskStatus status) {
 }

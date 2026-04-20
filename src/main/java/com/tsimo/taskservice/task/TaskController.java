@@ -2,11 +2,9 @@ package com.tsimo.taskservice.task;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -14,18 +12,38 @@ class TaskController {
 
     private final TaskService taskService;
 
-    TaskController (TaskService taskService) {
+    TaskController(TaskService taskService) {
         this.taskService = taskService;
     }
 
     @PostMapping("/tasks")
     public ResponseEntity<TaskResponse> createTask(@RequestBody @Valid TaskCreateRequest request) {
         TaskResponse createdTask = taskService.createTask(request);
-        return ResponseEntity.ok(createdTask);
+        URI location = URI.create("/tasks/" + createdTask.id());
+        return ResponseEntity.created(location).body(createdTask);
     }
 
     @GetMapping("/tasks")
     public ResponseEntity<List<TaskResponse>> findAll() {
         return ResponseEntity.ok(taskService.findAll());
+    }
+
+    @GetMapping("/tasks/{id}")
+    public ResponseEntity<TaskResponse> findById(@PathVariable Long id) {
+        TaskResponse taskResponse = taskService.findById(id);
+        return ResponseEntity.ok(taskResponse);
+    }
+
+    @PutMapping("/tasks/{id}")
+    public ResponseEntity<TaskResponse> updateTask(@PathVariable Long id,
+                                                   @RequestBody @Valid TaskUpdateRequest request) {
+        TaskResponse updatedTask = taskService.updateTask(id, request);
+        return ResponseEntity.ok(updatedTask);
+    }
+
+    @DeleteMapping("/tasks/{id}")
+    public ResponseEntity<Void> deleteTask(@PathVariable Long id) {
+        taskService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }
