@@ -22,6 +22,8 @@ public class TaskControllerTest {
 
     @Autowired
     TaskRepository taskRepository;
+    @Autowired
+    private TaskService taskService;
 
     @BeforeEach
     void setUp() {
@@ -40,12 +42,21 @@ public class TaskControllerTest {
     }
 
     @Test
-    void findAll_shouldReturnList() throws Exception {
+    void findAll_shouldReturnMappedPage() throws Exception {
         taskRepository.save(new Task("Task 1", "Desc 1"));
 
         mockMvc.perform(get("/tasks"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$.content[0].title").value("Task 1"))
+                .andExpect(jsonPath("$.totalElements").value(1));
+    }
+
+    @Test
+    void findAll_emptyPage_returnsEmptyPage() throws Exception {
+        mockMvc.perform(get("/tasks"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.content").isEmpty())
+                .andExpect(jsonPath("$.totalElements").value(0));
     }
 
     @Test

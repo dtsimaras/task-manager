@@ -1,5 +1,7 @@
 package com.tsimo.taskservice.task;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +20,11 @@ class TaskService {
         return mapTask(task);
     }
 
+    Page<TaskResponse> findAll(Pageable pageable) {
+        return taskRepository.findAll(pageable).map(this::mapTask);
+    }
+
+    @Deprecated
     List<TaskResponse> findAll() {
         return taskRepository.findAll().stream().map(this::mapTask).toList();
     }

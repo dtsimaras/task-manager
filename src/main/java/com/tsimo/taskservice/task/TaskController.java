@@ -1,6 +1,10 @@
 package com.tsimo.taskservice.task;
 
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +28,10 @@ class TaskController {
     }
 
     @GetMapping("/tasks")
-    public ResponseEntity<List<TaskResponse>> findAll() {
-        return ResponseEntity.ok(taskService.findAll());
+    public ResponseEntity<Page<TaskResponse>> findAll(
+            @PageableDefault(size = 10, sort = "createdAt", direction = Sort.Direction.DESC)
+            Pageable pageable) {
+        return ResponseEntity.ok(taskService.findAll(pageable));
     }
 
     @GetMapping("/tasks/{id}")
